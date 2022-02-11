@@ -1,6 +1,7 @@
 package com.project.core.di
 
 import androidx.room.Room
+import com.project.core.BuildConfig
 import com.project.core.data.source.local.MovieLocalDataSource
 import com.project.core.data.source.local.MovieDatabase
 import com.project.core.data.source.local.TvShowLocalDataSource
@@ -12,6 +13,9 @@ import com.project.core.data.source.repository.TvShowRepository
 import com.project.core.domain.repository.IMovieRepository
 import com.project.core.domain.repository.ITvShowRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import net.sqlcipher.database.SQLiteDatabase
+import net.sqlcipher.database.SupportFactory
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -24,25 +28,35 @@ val databaseModule = module {
     factory { get<MovieDatabase>().movieDao() }
     factory { get<MovieDatabase>().tvShowDao() }
     single {
+        val passPhrase: ByteArray = SQLiteDatabase.getBytes(BuildConfig.DATABASE_KEY.toCharArray())
+        val factory = SupportFactory(passPhrase)
         Room.databaseBuilder(
             androidContext(),
             MovieDatabase::class.java, "movie.db"
-        ).fallbackToDestructiveMigration().build()
+        ).fallbackToDestructiveMigration()
+            .openHelperFactory(factory)
+            .build()
     }
 }
 
 val networkModule = module {
     single {
+        val hostname = BuildConfig.HOSTNAME
+        val certificatePinner = CertificatePinner.Builder()
+            .add(hostname, BuildConfig.CERTIFICATE_PINNING_1)
+            .add(hostname, BuildConfig.CERTIFICATE_PINNING_2)
+            .build()
         OkHttpClient.Builder()
             .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .connectTimeout(120, TimeUnit.SECONDS)
             .readTimeout(120, TimeUnit.SECONDS)
+            .certificatePinner(certificatePinner)
             .build()
     }
 
     single {
         Retrofit.Builder()
-            .baseUrl("https://api.themoviedb.org/3/")
+            .baseUrl(BuildConfig.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(get())
             .build()

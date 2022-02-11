@@ -14,6 +14,8 @@ class FavoriteFragment : Fragment() {
     private var _binding: FragmentFavoriteBinding? = null
     private val binding get() = _binding as FragmentFavoriteBinding
 
+    private var mediator: TabLayoutMediator? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,15 +37,22 @@ class FavoriteFragment : Fragment() {
 
     private fun setUpViewPager() {
         binding.apply {
+            viewPager.isSaveEnabled = false
             viewPager.adapter = SectionPagerAdapter(activity as AppCompatActivity)
-            TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            mediator = TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                 tab.text = resources.getStringArray(R.array.tab_title)[position]
-            }.attach()
+            }
+
+            mediator?.attach()
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mediator?.detach()
+        mediator = null
+        binding.viewPager.adapter = null
         _binding = null
     }
 

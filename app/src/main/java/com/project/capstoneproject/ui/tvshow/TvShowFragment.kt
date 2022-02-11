@@ -258,8 +258,14 @@ class TvShowFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.apply {
+            rvSearchTvshow.adapter = null
+            rvPopularTvshow.adapter = null
+            rvAiringTodayTvshow.adapter = null
+            rvTopRateTvshow.adapter = null
+        }
         _binding = null
     }
 

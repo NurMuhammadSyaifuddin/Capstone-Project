@@ -264,8 +264,14 @@ class MovieFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.apply {
+            rvSearchMovie.adapter = null
+            rvPopularMovie.adapter = null
+            rvNowPlayingMovie.adapter = null
+            rvUpComingMovie.adapter = null
+        }
         _binding = null
     }
 
