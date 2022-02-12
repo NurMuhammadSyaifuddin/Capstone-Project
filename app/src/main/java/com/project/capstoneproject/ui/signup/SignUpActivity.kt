@@ -75,11 +75,10 @@ class SignUpActivity : AppCompatActivity() {
             val invalidFieldStream = Observable.combineLatest(
                 emailStream,
                 passwordStream,
-                confirmPasswordStream,
-                { emailInvalid, passwordInvalid, confirmPasswordInvalid ->
-                    !emailInvalid && !passwordInvalid && !confirmPasswordInvalid
-                }
-            )
+                confirmPasswordStream
+            ) { emailInvalid, passwordInvalid, confirmPasswordInvalid ->
+                !emailInvalid && !passwordInvalid && !confirmPasswordInvalid
+            }
             invalidFieldStream.subscribe { isValid ->
                 if (isValid)
                     btnCreateAccount.enable()

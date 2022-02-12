@@ -286,4 +286,5 @@ object DataMapper {
             voteAverage = input.voteAverage,
             firstAirDate = input.firstAirDate
         )
+
 }
